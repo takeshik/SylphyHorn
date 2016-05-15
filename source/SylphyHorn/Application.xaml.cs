@@ -76,7 +76,7 @@ namespace SylphyHorn
 
 					ThemeService.Current.Register(this, Theme.Windows, Accent.Windows);
 
-					this.ShowNotifyIcon(CommandLineArgs.ContainsKey(CanOpenSettingsArg));
+					this.ShowNotifyIcon(CommandLineArgs.ContainsKey(CanOpenSettingsArg) || ProductInfo.IsDebug);
 
 					this.VdmHelper = VdmHelperFactory.CreateInstance().AddTo(this);
 					this.VdmHelper.Init();

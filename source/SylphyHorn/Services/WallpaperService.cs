@@ -31,7 +31,13 @@ namespace SylphyHorn.Services
 				var newIndex = Array.IndexOf(desktops, e.NewDesktop) + 1;
 
 				var dirPath = Settings.General.DesktopBackgroundFolderPath.Value ?? "";
-				if (Directory.Exists(dirPath))
+				if (dirPath.Contains(";"))
+				{
+					var dirPaths = dirPath.Split(';');
+					dirPath = dirPaths[(newIndex - 1) % dirPaths.Length];
+					SetSlideshow(dirPath);
+				}
+				else if (Directory.Exists(dirPath))
 				{
 					foreach (var extension in _supportedExtensions)
 					{
@@ -59,6 +65,21 @@ namespace SylphyHorn.Services
 				0,
 				path,
 				SystemParametersInfoFlag.SPIF_UPDATEINIFILE | SystemParametersInfoFlag.SPIF_SENDWININICHANGE);
+		}
+
+		private static void SetSlideshow(string path)
+		{
+			var iniPath = Environment.ExpandEnvironmentVariables(@"%APPDATA%\Microsoft\Windows\Themes\slideshow.ini");
+			var ini =
+$@"[Slideshow]
+ImagesRootPath={path}
+";
+			var iniAttrs = File.GetAttributes(iniPath);
+			File.SetAttributes(iniPath, FileAttributes.Normal);
+			File.WriteAllText(iniPath, ini);
+			File.SetAttributes(iniPath, iniAttrs);
+
+			// TODO: refresh settings (restart explorer.exe is terrible...)
 		}
 	}
 }
